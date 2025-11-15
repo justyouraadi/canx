@@ -71,8 +71,6 @@ class AdminService {
           StatusCodes.UNAUTHORIZED
         );
       }
-
-      return checkIfAdminExists;
     } catch (error) {
       console.log(error, "<<< Error in Admin Service");
 

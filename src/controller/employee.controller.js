@@ -64,8 +64,25 @@ async function getById(req, res) {
   }
 }
 
+async function signIn(req, res) {
+  try {
+    const response = await employeeService.signIn({
+      phone: "+91" + req.body.phone,
+      password: req.body.password,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
   getById,
+  signIn,
 };

@@ -94,14 +94,76 @@ class EmployeeService {
       }
       return employee;
     } catch (error) {
-        console.log(error, "<<< Error in Employee Service getById");
-        if (error instanceof AppError) {
-          throw error;
-        }
+      console.log(error, "<<< Error in Employee Service getById");
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        "Internal Server Error",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async signIn(params) {
+    try {
+      const checkIfEmployeeExists = await employeeRepository.findOne({
+        phone: params.phone,
+      });
+      if (!checkIfEmployeeExists) {
         throw new AppError(
-          "Internal Server Error",
-          StatusCodes.INTERNAL_SERVER_ERROR
+          "No employee found with the given phone number.",
+          StatusCodes.NOT_FOUND
         );
+      }
+
+      const comparePassword = await checkIfEmployeeExists.comparePassword(
+        params.password
+      );
+
+      if (!comparePassword) {
+        throw new AppError(
+          "The password you have entered is incorrect.",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+
+      if (checkIfEmployeeExists.phone === params.phone && comparePassword) {
+        const token = await checkIfEmployeeExists.generateJWTToken();
+        return token;
+      } else {
+        throw new AppError(
+          "Invalid phone number or password.",
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service");
+
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        const value = error.keyValue[field];
+
+        throw new AppError(
+          `An account with this ${field}(${value}) already exists.`,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      if (error.name === "ValidationError") {
+        const errorMessages = Object.values(error.errors)
+          .map((val) => val.message)
+          .join(", ");
+        throw new AppError(errorMessages, StatusCodes.BAD_REQUEST);
+      }
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
