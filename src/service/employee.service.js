@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
-const {  EmployeeRepository } = require("../repository");
+const { EmployeeRepository } = require("../repository");
 const AppError = require("../utils/errors/app.error");
-const employeeRepository = new EmployeeRepository()
+const employeeRepository = new EmployeeRepository();
 
 class EmployeeService {
   async create(params) {
@@ -57,17 +57,17 @@ class EmployeeService {
       };
 
       const dataPromise = employeeRepository.find(filter, {
-      ...opts,
-      select: "-password"
-    });
+        ...opts,
+        select: "-password",
+      });
       const countPromise = employeeRepository.count(filter);
 
       const [data, totalCount] = await Promise.all([dataPromise, countPromise]);
       return {
-          totalCount,
-          totalPages: Math.ceil(totalCount / limitNumber),
-          currentPage: pageNumber,
-          employees: data,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limitNumber),
+        currentPage: pageNumber,
+        employees: data,
       };
     } catch (error) {
       console.log(error, "<<< Error in Employee Service getAll");
@@ -78,6 +78,30 @@ class EmployeeService {
         "Internal Server Error",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  async getById(id) {
+    try {
+      const employee = await employeeRepository.findById(id, {
+        select: "-password",
+      });
+      if (!employee) {
+        throw new AppError(
+          "No employee found with the corresponding details.",
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return employee;
+    } catch (error) {
+        console.log(error, "<<< Error in Employee Service getById");
+        if (error instanceof AppError) {
+          throw error;
+        }
+        throw new AppError(
+          "Internal Server Error",
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
     }
   }
 }

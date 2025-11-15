@@ -2,7 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const { EmployeeService } = require("../service");
 const { SuccessResponse, ErrorResponse } = require("../utils/common");
 
-const employeeService = new EmployeeService()
+const employeeService = new EmployeeService();
 
 async function create(req, res) {
   try {
@@ -51,7 +51,21 @@ async function getAll(req, res) {
   }
 }
 
+async function getById(req, res) {
+  try {
+    const response = await employeeService.getById(req.params.id);
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
+  getById,
 };
