@@ -2,11 +2,13 @@ const express = require('express');
 const { ServerConfig } = require('./src/config');
 const connectToDB = require('./src/config/db.config');
 const apiRoutes = require("./src/routes")
+const cors = require('cors');
 
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));    
+app.use(express.urlencoded({ extended: true }));  
+app.use(cors())  
 
 app.use("/api", apiRoutes);
 
