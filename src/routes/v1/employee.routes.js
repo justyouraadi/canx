@@ -1,10 +1,16 @@
 const express = require("express");
-const { EmployeeController } = require("../../controller");
+const { EmployeeController, LocationController } = require("../../controller");
+const { AuthMiddleware } = require("../../middleware");
 const router = express.Router();
 
 router.post("/", EmployeeController.create);
 router.get("/", EmployeeController.getAll);
 router.get("/:id", EmployeeController.getById);
-router.post("/signin",EmployeeController.signIn)
+router.post("/signin", EmployeeController.signIn);
+router.post(
+  "/location",
+  AuthMiddleware.checkEmpAuth,
+  LocationController.create
+);
 
 module.exports = router;

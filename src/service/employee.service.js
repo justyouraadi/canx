@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const { EmployeeRepository } = require("../repository");
 const AppError = require("../utils/errors/app.error");
+const { Auth } = require("../utils/common");
 const employeeRepository = new EmployeeRepository();
 
 class EmployeeService {
@@ -162,6 +163,32 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async isAuthenticated(token) {
+    try {
+      const response = Auth.verifyToken(token);
+      const employee = await this.getById(response.id);
+      return employee;
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service isAuthenticated");
+      if (error instanceof AppError) throw error;
+
+      if (
+        error.name === "JsonWebTokenError" ||
+        error.name === "TokenExpiredError"
+      ) {
+        throw new AppError(
+          "Invalid or expired authentication token provided.",
+          StatusCodes.FORBIDDEN
+        );
+      }
+
+      throw new AppError(
+        "Internal Server Error",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
