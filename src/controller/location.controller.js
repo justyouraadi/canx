@@ -22,6 +22,23 @@ async function create(req, res) {
   }
 }
 
+async function getEmployeeLocation(req, res) {
+  try {
+    const response = await locationService.getEmployeeLocation({
+      employeeId: req.params.employeeId,
+      date: req.query.date,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
+  getEmployeeLocation
 };

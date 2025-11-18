@@ -12,5 +12,10 @@ router.post(
   AuthMiddleware.checkEmpAuth,
   LocationController.create
 );
+router.get(
+  "/location/:employeeId",
+  // AuthMiddleware.checkEmpAuth,
+  LocationController.getEmployeeLocation
+);
 
 module.exports = router;
