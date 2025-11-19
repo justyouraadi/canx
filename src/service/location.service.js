@@ -56,7 +56,7 @@ class LocationService {
         sort: { createdAt: -1 },
         populate:{
           path: "employee",
-          select: "name email"
+          select: "name email phone"
         }
       })
       return locations;
