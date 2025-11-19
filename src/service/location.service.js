@@ -54,6 +54,10 @@ class LocationService {
       }
       const locations = await locationRepository.find(filter,{
         sort: { createdAt: -1 },
+        populate:{
+          path: "employee",
+          select: "name email"
+        }
       })
       return locations;
     } catch (error) {
