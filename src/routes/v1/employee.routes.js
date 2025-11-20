@@ -19,5 +19,7 @@ router.get(
   // AuthMiddleware.checkEmpAuth,
   LocationController.getEmployeeLocation
 );
+router.put("/status/update",EmployeeController.updateStatus)
+router.patch("/details/update",EmployeeController.updateDetails)
 
 module.exports = router;

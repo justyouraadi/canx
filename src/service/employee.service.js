@@ -46,6 +46,9 @@ class EmployeeService {
       if (name) {
         filter.name = new RegExp(name, "i");
       }
+      if (params.status) {
+        filter.status = params.status;
+      }
 
       const limitNumber = parseInt(limit, 10) || 10;
       const pageNumber = parseInt(page, 10) || 1;
@@ -86,10 +89,10 @@ class EmployeeService {
     try {
       const employee = await employeeRepository.findById(id, {
         select: "-password",
-         populate:{
+        populate: {
           path: "department",
-          select: "name"
-        }
+          select: "name",
+        },
       });
       if (!employee) {
         throw new AppError(
@@ -151,6 +154,98 @@ class EmployeeService {
 
         throw new AppError(
           `An account with this ${field}(${value}) already exists.`,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      if (error.name === "ValidationError") {
+        const errorMessages = Object.values(error.errors)
+          .map((val) => val.message)
+          .join(", ");
+        throw new AppError(errorMessages, StatusCodes.BAD_REQUEST);
+      }
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async updateStatus(params) {
+    try {
+      if (
+        params.status != "ACTIVE" &&
+        params.status != "INACTIVE" &&
+        params.status != "RESIGNED"
+      ) {
+        throw new AppError(
+          "Invalid status value provided.",
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      const response = await employeeRepository.updateById(params.id, {
+        status: params.status,
+      });
+      if (!response) {
+        throw new AppError(
+          "No employee found with the corresponding details.",
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service");
+
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        const value = error.keyValue[field];
+
+        throw new AppError(
+          `A Employee with this ${field}(${value}) already exists.`,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      if (error.name === "ValidationError") {
+        const errorMessages = Object.values(error.errors)
+          .map((val) => val.message)
+          .join(", ");
+        throw new AppError(errorMessages, StatusCodes.BAD_REQUEST);
+      }
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  
+  async updateDetails(params) {
+    try {
+      const response = await employeeRepository.updateById(params.id, params);
+      if(!response) {
+        throw new AppError(
+          "No employee found with the corresponding details.",
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service");
+
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        const value = error.keyValue[field];
+
+        throw new AppError(
+          `A Employee with this ${field}(${value}) already exists.`,
           StatusCodes.CONFLICT
         );
       }
