@@ -6,6 +6,7 @@ const router = express.Router();
 router.post("/", EmployeeController.create);
 router.get("/", EmployeeController.getAll);
 router.get("/:id", EmployeeController.getById);
+router.get("/get/profile",AuthMiddleware.checkEmpAuth,EmployeeController.getProfile)
 router.post("/signin", EmployeeController.signIn);
 router.post(
   "/location",

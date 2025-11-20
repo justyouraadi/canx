@@ -86,6 +86,10 @@ class EmployeeService {
     try {
       const employee = await employeeRepository.findById(id, {
         select: "-password",
+         populate:{
+          path: "department",
+          select: "name"
+        }
       });
       if (!employee) {
         throw new AppError(

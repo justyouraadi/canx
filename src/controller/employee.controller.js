@@ -80,9 +80,22 @@ async function signIn(req, res) {
   }
 }
 
+async function getProfile(req, res) {
+  try {
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = req.employee;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
   getById,
   signIn,
+  getProfile
 };
