@@ -6,7 +6,6 @@ const employeeService = new EmployeeService();
 
 async function create(req, res) {
   try {
-    console.log("file",req.file);
     const response = await employeeService.create({
       empId: req.body.empId,
       name: req.body.name,
