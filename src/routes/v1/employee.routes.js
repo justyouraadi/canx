@@ -1,9 +1,10 @@
 const express = require("express");
 const { EmployeeController, LocationController } = require("../../controller");
 const { AuthMiddleware } = require("../../middleware");
+const { Upload } = require("../../utils/common");
 const router = express.Router();
 
-router.post("/", EmployeeController.create);
+router.post("/",Upload.single('profile') ,EmployeeController.create);
 router.get("/", EmployeeController.getAll);
 router.get("/:id", EmployeeController.getById);
 router.get("/get/profile",AuthMiddleware.checkEmpAuth,EmployeeController.getProfile)

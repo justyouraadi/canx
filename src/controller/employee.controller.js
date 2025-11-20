@@ -6,13 +6,14 @@ const employeeService = new EmployeeService();
 
 async function create(req, res) {
   try {
+    console.log("file",req.file);
     const response = await employeeService.create({
       empId: req.body.empId,
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
       password: req.body.password,
-      profile: req.file || null,
+      profile: req.file ? req.file.filename : null,
       department: req.body.department,
       designation: req.body.designation,
       joiningDate: req.body.joiningDate,
