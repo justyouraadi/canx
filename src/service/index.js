@@ -4,4 +4,5 @@ module.exports = {
     EmployeeService: require('./employee.service'),
     LocationService: require('./location.service'),
     AttendanceService: require('./attendance.service'),
+    SettingService: require('./setting.service')
 }
