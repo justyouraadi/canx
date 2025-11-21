@@ -111,11 +111,10 @@ async function updateStatus(req, res) {
 
 async function updateDetails(req, res) {
   try {
-    const response = await employeeService.updateDetails({
-      id: req.body.id,
+    const response = await employeeService.updateDetails(req.body.id, {
       name: req.body.name,
       email: req.body.email,
-      phone:req.body.phone,
+      phone: req.body.phone,
       department: req.body.department,
       designation: req.body.designation,
       joiningDate: req.body.joiningDate,

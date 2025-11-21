@@ -4,4 +4,5 @@ module.exports = {
     DepartmentRepository: require('./department.repository'),
     EmployeeRepository: require('./employee.repository'),
     LocationRepository: require('./location.repository'),
+    AttendanceRepository: require('./attendance.repository'),
 }

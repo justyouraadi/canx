@@ -227,9 +227,9 @@ class EmployeeService {
     }
   }
   
-  async updateDetails(params) {
+  async updateDetails(id, params) {
     try {
-      const response = await employeeRepository.updateById(params.id, params);
+      const response = await employeeRepository.updateById(id, params);
       if(!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
