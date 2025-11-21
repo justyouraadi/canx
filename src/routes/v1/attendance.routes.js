@@ -1,8 +1,17 @@
-const express = require('express');
-const { AttendanceController } = require('../../controller');
-const { AuthMiddleware } = require('../../middleware');
+const express = require("express");
+const { AttendanceController } = require("../../controller");
+const { AuthMiddleware } = require("../../middleware");
 const router = express.Router();
 
-router.post('/', AuthMiddleware.checkEmpAuth,AttendanceController.create)
+router.post(
+  "/checkin",
+  AuthMiddleware.checkEmpAuth,
+  AttendanceController.create
+);
+router.put(
+  "/checkout",
+  AuthMiddleware.checkEmpAuth,
+  AttendanceController.checkOut
+);
 
 module.exports = router;

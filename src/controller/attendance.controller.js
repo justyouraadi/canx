@@ -15,7 +15,21 @@ async function create(req, res) {
     SuccessResponse.data = {};
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
-    console.log(error);
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+async function checkOut(req, res) {
+  try {
+    const response = await attendanceService.checkOut({
+      employee: req.employee._id,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = {};
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+  } catch (error) {
     ErrorResponse.message = "Something went wrong";
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
@@ -24,4 +38,5 @@ async function create(req, res) {
 
 module.exports = {
   create,
+  checkOut,
 };
