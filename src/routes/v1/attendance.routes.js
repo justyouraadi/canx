@@ -14,4 +14,9 @@ router.put(
   AttendanceController.checkOut
 );
 
+router.get("/validate/checkin",
+  AuthMiddleware.checkEmpAuth,
+  AttendanceController.checkTodayCheckedIn
+)
+
 module.exports = router;

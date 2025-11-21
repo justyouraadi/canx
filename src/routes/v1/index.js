@@ -10,7 +10,6 @@ router.use("/admin", AdminRoutes);
 router.use("/departments", DepartmentRoutes);
 router.use("/employees", EmployeeRoutes);
 router.use("/attendance", AttendanceRoutes);
-router.use("/settings", AttendanceRoutes);
 router.use("/settings", SettingRoutes);
 
 module.exports = router;

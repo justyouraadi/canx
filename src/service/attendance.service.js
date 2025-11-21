@@ -102,6 +102,33 @@ class AttendanceService {
       );
     }
   }
+
+  async checkTodayCheckedIn(params) {
+    try {
+      const attendanceRecord = await attendanceRepository.findOne({
+        employee: params.employee,
+        date: new Date(new Date(new Date()).setHours(0, 0, 0, 0)),
+      });
+      if (!attendanceRecord) {
+        throw new AppError(
+          "Attendance record not found for check-out.",
+          StatusCodes.NOT_FOUND
+        );
+      }
+
+      return attendanceRecord;
+    } catch (error) {
+      console.log(error, "<<< Error in Attendance Service");
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 module.exports = AttendanceService;

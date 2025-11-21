@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "dev": "TZ=Asia/Kolkata nodemon index.js",
+    "start": "TZ=Asia/Kolkata node index.js"
   },
   "repository": {
     "type": "git",

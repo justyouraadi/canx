@@ -36,7 +36,23 @@ async function checkOut(req, res) {
   }
 }
 
+async function checkTodayCheckedIn(req, res) {
+  try {
+    const response = await attendanceService.checkTodayCheckedIn({
+      employee: req.employee._id,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = {};
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   checkOut,
+  checkTodayCheckedIn,
 };
