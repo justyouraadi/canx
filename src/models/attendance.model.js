@@ -19,6 +19,18 @@ const attendanceSchema = new Schema(
       type: Date,
       default: null,
     },
+    totalDistance: {
+      type: Number,
+      default: 0,
+    },
+    totalFare: {
+      type: Number,
+      default: 0,
+    },
+    perKmFare: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

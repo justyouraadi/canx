@@ -1,9 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/errors/app.error");
-const { LocationRepository, AttendanceRepository } = require("../repository");
+const {
+  LocationRepository,
+  AttendanceRepository,
+  SettingRepository,
+} = require("../repository");
 
 const locationRepository = new LocationRepository();
 const attendanceRepository = new AttendanceRepository();
+const settingRepository = new SettingRepository();
 
 class LocationService {
   async create(params) {
@@ -12,13 +17,13 @@ class LocationService {
         employee: params.employee,
         date: new Date(new Date(new Date()).setHours(0, 0, 0, 0)),
       });
-      if (!checkEmployeeAttendance){
+      if (!checkEmployeeAttendance) {
         throw new AppError(
           "Employee has not checked in today. Cannot record location.",
           StatusCodes.BAD_REQUEST
         );
       }
-      if(checkEmployeeAttendance.checkOutTime){
+      if (checkEmployeeAttendance.checkOutTime) {
         throw new AppError(
           "Employee has already checked out today. Cannot record location.",
           StatusCodes.BAD_REQUEST
@@ -80,6 +85,71 @@ class LocationService {
       return locations;
     } catch (error) {
       console.log(error, "<<< Error in Admin Service getEmployeeLocations");
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async calculateDistanceAndCalculate(params) {
+    try {
+      const { perKmFare } = await settingRepository.findOne({});
+
+      const filter = { employee: params.employee };
+      const targetDate = params.date;
+      const startDate = new Date(targetDate);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(targetDate);
+      endDate.setHours(23, 59, 59, 999);
+
+      filter.createdAt = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+
+      const locations = await locationRepository.find(filter, {
+        sort: { createdAt: 1 },
+      });
+
+      let totalDistance = 0;
+      const calculateDist = (lat1, lon1, lat2, lon2) => {
+        const R = 6371;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      };
+
+      for (let i = 0; i < locations.length - 1; i++) {
+        const loc1 = locations[i];
+        const loc2 = locations[i + 1];
+        totalDistance += calculateDist(
+          loc1.latitude,
+          loc1.longitude,
+          loc2.latitude,
+          loc2.longitude
+        );
+      }
+
+      totalDistance = Math.round(totalDistance * 100) / 100;
+      const totalFare = Math.round(totalDistance * perKmFare);
+      return {
+        totalDistance: totalDistance,
+        totalFare: totalFare,
+        perKmFare: perKmFare,
+      };
+    } catch (error) {
+      console.log(error, "<<< Error in Location Service calculateFare");
       if (error instanceof AppError) {
         throw error;
       }

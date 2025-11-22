@@ -1,8 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/errors/app.error");
 const { AttendanceRepository } = require("../repository");
+const LocationService = require("./location.service");
 
 const attendanceRepository = new AttendanceRepository();
+const locationService = new LocationService();
 
 class AttendanceService {
   async create(params) {
@@ -60,9 +62,15 @@ class AttendanceService {
         );
       }
 
+      const { totalDistance, totalFare, perKmFare } =
+        await locationService.calculateDistanceAndCalculate({
+          employee: params.employee,
+          date: new Date(new Date(new Date()).setHours(0, 0, 0, 0)),
+        });
+
       const updatedRecord = await attendanceRepository.updateById(
         attendanceRecord._id,
-        { checkOutTime: new Date() }
+        { checkOutTime: new Date(), totalDistance, totalFare, perKmFare }
       );
 
       if (!updatedRecord) {
