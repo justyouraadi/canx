@@ -55,7 +55,7 @@ async function getEmployeeAttendanceForAdmin(req,res){
    try {
     const response = await attendanceService.getEmployeeAttendanceForAdmin({
       employee: req.params.employee,
-      date: new Date(new Date(new Date()).setHours(0, 0, 0, 0))
+      date: req.query.date
     });
     SuccessResponse.message = "Successfully completed the request";
     SuccessResponse.data = response;

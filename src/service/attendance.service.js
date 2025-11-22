@@ -140,9 +140,16 @@ class AttendanceService {
 
   async getEmployeeAttendanceForAdmin(params) {
     try {
+      const date = new Date(params.date);
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+
       const response = await attendanceRepository.findOne({
         employee: params.employee,
-        date: params.date,
+        date: {
+          $gte: startOfDay,
+          $lte: endOfDay
+        },
       });
       if (!response) {
         return {};
