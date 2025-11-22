@@ -137,6 +137,29 @@ class AttendanceService {
       );
     }
   }
+
+  async getEmployeeAttendanceForAdmin(params) {
+    try {
+      const response = await attendanceRepository.findOne({
+        employee: params.employee,
+        date: params.date,
+      });
+      if (!response) {
+        return {};
+      }
+      return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Attendance Service");
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 module.exports = AttendanceService;

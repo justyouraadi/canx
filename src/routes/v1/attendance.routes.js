@@ -19,4 +19,9 @@ router.get("/validate/checkin",
   AttendanceController.checkTodayCheckedIn
 )
 
+router.get("/admin/employee/:employee",
+  // AuthMiddleware.checkAdminAuth,
+  AttendanceController.getEmployeeAttendanceForAdmin
+)
+
 module.exports = router;
