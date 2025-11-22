@@ -1,11 +1,29 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/errors/app.error");
-const { LocationRepository } = require("../repository");
+const { LocationRepository, AttendanceRepository } = require("../repository");
+
 const locationRepository = new LocationRepository();
+const attendanceRepository = new AttendanceRepository();
 
 class LocationService {
   async create(params) {
     try {
+      const checkEmployeeAttendance = await attendanceRepository.findOne({
+        employee: params.employee,
+        date: new Date(new Date(new Date()).setHours(0, 0, 0, 0)),
+      });
+      if (!checkEmployeeAttendance){
+        throw new AppError(
+          "Employee has not checked in today. Cannot record location.",
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      if(checkEmployeeAttendance.checkOutTime){
+        throw new AppError(
+          "Employee has already checked out today. Cannot record location.",
+          StatusCodes.BAD_REQUEST
+        );
+      }
       const response = await locationRepository.create(params);
       return response;
     } catch (error) {
@@ -52,13 +70,13 @@ class LocationService {
           $lte: endDate,
         };
       }
-      const locations = await locationRepository.find(filter,{
+      const locations = await locationRepository.find(filter, {
         sort: { createdAt: -1 },
-        populate:{
+        populate: {
           path: "employee",
-          select: "name email phone"
-        }
-      })
+          select: "name email phone",
+        },
+      });
       return locations;
     } catch (error) {
       console.log(error, "<<< Error in Admin Service getEmployeeLocations");
