@@ -142,7 +142,7 @@ async function updatePassword(req, res) {
       password: req.body.password,
     });
     SuccessResponse.message = "Successfully completed the request";
-    SuccessResponse.data = response;
+    SuccessResponse.data = {};
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.message = "Something went wrong";
