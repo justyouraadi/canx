@@ -25,5 +25,6 @@ router.get(
 );
 router.put("/status/update", EmployeeController.updateStatus);
 router.patch("/details/update", EmployeeController.updateDetails);
+router.put("/password/update", EmployeeController.updatePassword);
 
 module.exports = router;

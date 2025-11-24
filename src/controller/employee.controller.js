@@ -136,6 +136,21 @@ async function updateDetails(req, res) {
   }
 }
 
+async function updatePassword(req, res) {
+  try {
+    const response = await employeeService.updatePassword(req.body.id, {
+      password: req.body.password,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
@@ -144,4 +159,5 @@ module.exports = {
   getProfile,
   updateStatus,
   updateDetails,
+  updatePassword,
 };

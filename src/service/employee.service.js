@@ -3,6 +3,7 @@ const { EmployeeRepository } = require("../repository");
 const AppError = require("../utils/errors/app.error");
 const { Auth } = require("../utils/common");
 const employeeRepository = new EmployeeRepository();
+const bcrypt = require("bcryptjs");
 
 class EmployeeService {
   async create(params) {
@@ -226,11 +227,51 @@ class EmployeeService {
       );
     }
   }
-  
+
   async updateDetails(id, params) {
     try {
       const response = await employeeRepository.updateById(id, params);
-      if(!response) {
+      if (!response) {
+        throw new AppError(
+          "No employee found with the corresponding details.",
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service");
+
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        const value = error.keyValue[field];
+
+        throw new AppError(
+          `A Employee with this ${field}(${value}) already exists.`,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      if (error.name === "ValidationError") {
+        const errorMessages = Object.values(error.errors)
+          .map((val) => val.message)
+          .join(", ");
+        throw new AppError(errorMessages, StatusCodes.BAD_REQUEST);
+      }
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async updatePassword(id, params) {
+    try {
+      const response = await employeeRepository.updateById(id, { password: await bcrypt.hash(params.password, 10) });
+      if (!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
           StatusCodes.NOT_FOUND
