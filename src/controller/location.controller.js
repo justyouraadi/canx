@@ -38,7 +38,25 @@ async function getEmployeeLocation(req, res) {
   }
 }
 
+async function getEmployeeLocationForApp(req, res) {
+  try {
+    const response = await locationService.getEmployeeLocation({
+      employeeId: req.employee._id,
+      date: req.query.date,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
 module.exports = {
   create,
-  getEmployeeLocation
+  getEmployeeLocation,
+  getEmployeeLocationForApp
 };

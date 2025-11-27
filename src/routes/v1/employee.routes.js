@@ -23,6 +23,7 @@ router.get(
   // AuthMiddleware.checkEmpAuth,
   LocationController.getEmployeeLocation
 );
+router.get("/get/location/app", AuthMiddleware.checkEmpAuth, LocationController.getEmployeeLocationForApp);
 router.put("/status/update", EmployeeController.updateStatus);
 router.patch("/details/update", EmployeeController.updateDetails);
 router.put("/password/update", EmployeeController.updatePassword);
