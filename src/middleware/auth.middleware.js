@@ -15,7 +15,6 @@ async function checkEmpAuth(req, res, next) {
     const response = await employeeService.isAuthenticated(data);
     if (response) {
       req.employee = response;
-      console.log("Authenticated Employee:", req.employee);
       next();   
     } else {
       throw new AppError("Invalid JWT Token", StatusCodes.FORBIDDEN);

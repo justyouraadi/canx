@@ -4,5 +4,6 @@ module.exports = {
   EmployeeController: require('./employee.controller'),
   LocationController: require('./location.controller'),
   AttendanceController: require('./attendance.controller'),
-  SettingController: require('./setting.controller')
+  SettingController: require('./setting.controller'),
+  OfflineController: require('./offline.controller')
 };
