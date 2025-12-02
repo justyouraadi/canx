@@ -24,4 +24,9 @@ router.get("/admin/employee/:employee",
   AttendanceController.getEmployeeAttendanceForAdmin
 )
 
+router.get("/month/admin/employee/:employee",
+  // AuthMiddleware.checkAdminAuth,
+  AttendanceController.getEmployeeMonthlyAttendanceForAdmin
+)
+
 module.exports = router;

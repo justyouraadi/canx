@@ -51,11 +51,28 @@ async function checkTodayCheckedIn(req, res) {
   }
 }
 
-async function getEmployeeAttendanceForAdmin(req,res){
-   try {
+async function getEmployeeAttendanceForAdmin(req, res) {
+  try {
     const response = await attendanceService.getEmployeeAttendanceForAdmin({
       employee: req.params.employee,
-      date: req.query.date
+      date: req.query.date,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+async function getEmployeeMonthlyAttendanceForAdmin(req, res) {
+  try {
+    const response = await attendanceService.getEmployeeMonthlyAttendanceForAdmin({
+      employee: req.params.employee,
+      year:req.query.year,
+      month: req.query.month,
     });
     SuccessResponse.message = "Successfully completed the request";
     SuccessResponse.data = response;
@@ -71,5 +88,6 @@ module.exports = {
   create,
   checkOut,
   checkTodayCheckedIn,
-  getEmployeeAttendanceForAdmin
+  getEmployeeAttendanceForAdmin,
+  getEmployeeMonthlyAttendanceForAdmin,
 };

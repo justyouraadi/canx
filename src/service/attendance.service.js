@@ -148,12 +148,45 @@ class AttendanceService {
         employee: params.employee,
         date: {
           $gte: startOfDay,
-          $lte: endOfDay
+          $lte: endOfDay,
         },
       });
       if (!response) {
         return {};
       }
+      return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Attendance Service");
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getEmployeeMonthlyAttendanceForAdmin(params) {
+    try {
+      const { employee, month, year } = params;
+      const filter = { employee: employee };
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+      filter.date = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+
+      const response = await attendanceRepository.find(filter,{
+        sort: {date: 1},
+        populate: {
+          path: "employee",
+          select: "name email phone",
+        },
+      });
       return response;
     } catch (error) {
       console.log(error, "<<< Error in Attendance Service");
