@@ -58,7 +58,7 @@ class EmployeeService {
       const opts = {
         limit: limitNumber,
         skip: skip,
-        sort: { name: 1 },
+        sort: { createdAt: -1 },
       };
 
       const dataPromise = employeeRepository.find(filter, {
