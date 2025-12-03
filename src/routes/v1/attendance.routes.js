@@ -3,6 +3,10 @@ const { AttendanceController } = require("../../controller");
 const { AuthMiddleware } = require("../../middleware");
 const router = express.Router();
 
+router.get("/monthly",
+  AuthMiddleware.checkEmpAuth,
+  AttendanceController.getEmployeeMonthlyAttendance
+)
 router.post(
   "/checkin",
   AuthMiddleware.checkEmpAuth,
@@ -23,6 +27,7 @@ router.get("/admin/employee/:employee",
   // AuthMiddleware.checkAdminAuth,
   AttendanceController.getEmployeeAttendanceForAdmin
 )
+
 
 router.get("/month/admin/employee/:employee",
   // AuthMiddleware.checkAdminAuth,
