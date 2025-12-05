@@ -7,4 +7,5 @@ module.exports = {
   SettingController: require('./setting.controller'),
   OfflineController: require('./offline.controller'),
   VisitController: require('./visit.controller'),
+  LeaveController: require('./leave.controller'),
 };
