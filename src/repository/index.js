@@ -6,5 +6,6 @@ module.exports = {
     LocationRepository: require('./location.repository'),
     AttendanceRepository: require('./attendance.repository'),
     SettingRepository: require('./setting.repository'),
-    OfflineRepository: require('./offline.repository')
+    OfflineRepository: require('./offline.repository'),
+    VisitRepository: require('./visit.repository')
 }

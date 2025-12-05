@@ -5,5 +5,6 @@ module.exports = {
     LocationService: require('./location.service'),
     AttendanceService: require('./attendance.service'),
     SettingService: require('./setting.service'),
-    OfflineService: require('./offline.service')
+    OfflineService: require('./offline.service'),
+    VisitService: require('./visit.service')
 }
