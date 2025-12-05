@@ -5,5 +5,5 @@ const router = express.Router();
 
 router.post("/", AuthMiddleware.checkEmpAuth, VisitController.create);
 router.get("/", AuthMiddleware.checkEmpAuth, VisitController.getAll);
-
+router.get("/admin/:id", VisitController.getForAdmin);
 module.exports = router;

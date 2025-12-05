@@ -67,7 +67,8 @@ class VisitService {
         sort: { createdAt: -1 },
       };
 
-      const visitsPromise = visitRepository.find(filter, opts, {
+      const visitsPromise = visitRepository.find(filter, {
+        ...opts,
         populate: {
           path: "employee",
           select: "name email phone",
