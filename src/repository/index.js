@@ -8,5 +8,6 @@ module.exports = {
     SettingRepository: require('./setting.repository'),
     OfflineRepository: require('./offline.repository'),
     VisitRepository: require('./visit.repository'),
-    LeaveRepository: require('./leave.repository')
+    LeaveRepository: require('./leave.repository'),
+    ClaimRepository: require('./claim.repository')
 }

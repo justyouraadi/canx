@@ -7,5 +7,6 @@ module.exports = {
     SettingService: require('./setting.service'),
     OfflineService: require('./offline.service'),
     VisitService: require('./visit.service'),
-    LeaveService: require('./leave.service')
+    LeaveService: require('./leave.service'),
+    ClaimService: require('./claim.service')
 }
