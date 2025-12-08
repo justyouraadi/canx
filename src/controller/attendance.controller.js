@@ -102,6 +102,23 @@ async function getEmployeeMonthlyAttendanceForAdmin(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+async function getEmployeeMonthlyAttendanceForApp(req, res) {
+  try {
+    const response =
+      await attendanceService.getEmployeeMonthlyAttendanceForAdmin({
+        employee: req.employee._id,
+        year: req.query.year,
+        month: req.query.month,
+      });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
 
 module.exports = {
   create,
@@ -110,4 +127,5 @@ module.exports = {
   getEmployeeAttendanceForAdmin,
   getEmployeeMonthlyAttendance,
   getEmployeeMonthlyAttendanceForAdmin,
+  getEmployeeMonthlyAttendanceForApp
 };

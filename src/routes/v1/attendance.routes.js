@@ -18,6 +18,8 @@ router.put(
   AttendanceController.checkOut
 );
 
+router.get("/month/app/employee",AuthMiddleware.checkEmpAuth,AttendanceController.getEmployeeMonthlyAttendanceForApp)
+
 router.get("/validate/checkin",
   AuthMiddleware.checkEmpAuth,
   AttendanceController.checkTodayCheckedIn
