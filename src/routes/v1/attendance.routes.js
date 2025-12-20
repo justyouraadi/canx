@@ -36,4 +36,8 @@ router.get("/month/admin/employee/:employee",
   AttendanceController.getEmployeeMonthlyAttendanceForAdmin
 )
 
+router.post("/month/salary/slip/meta",
+  AttendanceController.monthAttendanceCount
+)
+
 module.exports = router;

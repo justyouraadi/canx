@@ -1,9 +1,11 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/errors/app.error");
-const { AttendanceRepository } = require("../repository");
+const { AttendanceRepository, LeaveRepository } = require("../repository");
 const LocationService = require("./location.service");
+const { default: mongoose } = require("mongoose");
 
 const attendanceRepository = new AttendanceRepository();
+const leaveRepository = new LeaveRepository();
 const locationService = new LocationService();
 
 class AttendanceService {
@@ -180,14 +182,72 @@ class AttendanceService {
         $lte: endDate,
       };
 
-      const response = await attendanceRepository.find(filter,{
-        sort: {date: 1},
+      const response = await attendanceRepository.find(filter, {
+        sort: { date: 1 },
         populate: {
           path: "employee",
           select: "name email phone",
         },
       });
       return response;
+    } catch (error) {
+      console.log(error, "<<< Error in Attendance Service");
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async monthAttendanceCount(params) {
+    try {
+      const { employee, month, year } = params;
+      const filter = { employee: employee };
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+      filter.date = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+
+      const totalPresentDays = await attendanceRepository.count(filter);
+      const totalLeaveDays = await leaveRepository.count({
+        employee,
+        createdAt: filter.date,
+        status: "Approved",
+      });
+      const totalDaysInMonth = new Date(year, month, 0).getDate();
+      const pipeline = await attendanceRepository.aggregate([
+        {
+          $match: {
+            employee: new mongoose.Types.ObjectId(employee),
+            date: {
+              $gte: startDate,
+              $lte: endDate,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalFare: { $sum: "$totalFare" },
+          },
+        },
+      ]);
+
+      const totalTravelAllowance =
+      pipeline.length > 0 ? pipeline[0].totalFare : 0;
+
+      return {
+        totalPresentDays,
+        totalLeaveDays,
+        totalDaysInMonth,
+        totalTravelAllowance
+      };
     } catch (error) {
       console.log(error, "<<< Error in Attendance Service");
 

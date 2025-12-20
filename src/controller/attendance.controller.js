@@ -120,6 +120,24 @@ async function getEmployeeMonthlyAttendanceForApp(req, res) {
   }
 }
 
+async function monthAttendanceCount(req, res) {
+  try {
+    const response =
+      await attendanceService.monthAttendanceCount({
+        employee: req.body.employeeId,
+        year: req.body.year,
+        month: req.body.month,
+      });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   checkOut,
@@ -127,5 +145,6 @@ module.exports = {
   getEmployeeAttendanceForAdmin,
   getEmployeeMonthlyAttendance,
   getEmployeeMonthlyAttendanceForAdmin,
-  getEmployeeMonthlyAttendanceForApp
+  getEmployeeMonthlyAttendanceForApp,
+  monthAttendanceCount,
 };
