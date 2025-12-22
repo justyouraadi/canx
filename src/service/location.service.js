@@ -106,13 +106,13 @@ class LocationService {
       const endDate = new Date(targetDate);
       endDate.setHours(23, 59, 59, 999);
 
-      filter.createdAt = {
+      filter.deviceTimestamp = {
         $gte: startDate,
         $lte: endDate,
       };
 
       const locations = await locationRepository.find(filter, {
-        sort: { createdAt: 1 },
+        sort: { deviceTimestamp: 1 },
       });
 
       let totalDistance = 0;
@@ -133,12 +133,15 @@ class LocationService {
       for (let i = 0; i < locations.length - 1; i++) {
         const loc1 = locations[i];
         const loc2 = locations[i + 1];
-        totalDistance += calculateDist(
+        const segmentDistance = calculateDist(
           loc1.latitude,
           loc1.longitude,
           loc2.latitude,
           loc2.longitude
         );
+        if (segmentDistance > 0.02) {
+          totalDistance += segmentDistance;
+        }
       }
 
       totalDistance = Math.round(totalDistance * 100) / 100;

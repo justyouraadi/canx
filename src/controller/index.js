@@ -9,4 +9,5 @@ module.exports = {
   VisitController: require("./visit.controller"),
   LeaveController: require("./leave.controller"),
   ClaimController: require("./claim.controller"),
+  SlipController: require("./slip.controller")
 };
