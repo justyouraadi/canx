@@ -19,6 +19,10 @@ const slipSchema = new Schema(
       type: Number,
       required: true,
     },
+    claimsAmount: {
+      type: Number,
+      required: true,
+    },
     workingDays: {
       type: Number,
       required: true,
@@ -59,6 +63,6 @@ const slipSchema = new Schema(
   { timestamps: true }
 );
 
-const Slip = model("slip",slipSchema)
+const Slip = model("slip", slipSchema);
 
 module.exports = Slip;

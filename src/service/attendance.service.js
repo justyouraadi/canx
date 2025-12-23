@@ -1,10 +1,15 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/errors/app.error");
-const { AttendanceRepository, LeaveRepository } = require("../repository");
+const {
+  AttendanceRepository,
+  LeaveRepository,
+  ClaimRepository,
+} = require("../repository");
 const LocationService = require("./location.service");
 const { default: mongoose } = require("mongoose");
 
 const attendanceRepository = new AttendanceRepository();
+const claimsRepository = new ClaimRepository();
 const leaveRepository = new LeaveRepository();
 const locationService = new LocationService();
 
@@ -239,14 +244,34 @@ class AttendanceService {
         },
       ]);
 
+      const claimsTotal = await claimsRepository.aggregate([
+        {
+          $match: {
+            employee: new mongoose.Types.ObjectId(employee),
+            createdAt: {
+              $gte: startDate,
+              $lte: endDate,
+            },
+            status: "APPROVED",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            amount: { $sum: "$amount" },
+          },
+        },
+      ]);
+
       const totalTravelAllowance =
-      pipeline.length > 0 ? pipeline[0].totalFare : 0;
+        pipeline.length > 0 ? pipeline[0].totalFare : 0;
 
       return {
         totalPresentDays,
         totalLeaveDays,
         totalDaysInMonth,
-        totalTravelAllowance
+        totalTravelAllowance,
+        totalClaimsAmount: claimsTotal.length > 0 ? claimsTotal[0].amount : 0,
       };
     } catch (error) {
       console.log(error, "<<< Error in Attendance Service");

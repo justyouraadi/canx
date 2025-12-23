@@ -29,6 +29,10 @@ router.get("/admin/employee/:employee",
   // AuthMiddleware.checkAdminAuth,
   AttendanceController.getEmployeeAttendanceForAdmin
 )
+router.get("/app/employee/:employee",
+  AuthMiddleware.checkEmpAuth,
+  AttendanceController.getEmployeeAttendanceForApp
+)
 
 
 router.get("/month/admin/employee/:employee",
