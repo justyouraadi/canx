@@ -251,41 +251,21 @@ class SlipService {
     }
   }
 
-
   async getForParticularEmployee(params) {
     try {
       const { page, limit, employee, date } = params;
       const filter = {
         employee: employee,
-        status: "Generated"
+        status: "Generated",
       };
 
       if (date) {
         const inputDate = new Date(date);
-        const startDate = new Date(
-          inputDate.getFullYear(),
-          inputDate.getMonth(),
-          1,
-          0,
-          0,
-          0,
-          0
-        );
+        const month = inputDate.getMonth() + 1;
+        const year = inputDate.getFullYear();
 
-        const endDate = new Date(
-          inputDate.getFullYear(),
-          inputDate.getMonth() + 1,
-          0,
-          23,
-          59,
-          59,
-          999
-        );
-
-        filter.createdAt = {
-          $gte: startDate,
-          $lte: endDate,
-        };
+        filter.month = month;
+        filter.year = year;
       }
 
       const limitNumber = parseInt(limit, 10) || 10;
