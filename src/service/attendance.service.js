@@ -285,6 +285,44 @@ class AttendanceService {
       );
     }
   }
+
+  async autoCheckoutAll() {
+    try {
+      const today = new Date(new Date().setHours(0, 0, 0, 0));
+      const pendingAttendances = await attendanceRepository.find({
+        date: today,
+        checkOutTime: null,
+      });
+
+      console.log(
+        `[Cron Job] Found ${pendingAttendances.length} pending checkouts.`
+      );
+      console.log(pendingAttendances);
+      for (const attendance of pendingAttendances) {
+        try {
+          console.log(
+            `[Cron Job] Auto-checking out attendance ID: ${attendance._id}`
+          );
+          await this.checkOut({ employee: attendance._id });
+          console.log(
+            `[Cron Job] Successfully auto-checked out attendance ID: ${attendance._id}`
+          );
+        } catch (error) {
+          console.log(
+            `[Cron Job] Failed to auto-check out attendance ID: ${attendance._id}`,
+            error
+          );
+        }
+      }
+      return pendingAttendances;
+    } catch (error) {
+      console.error("<<< Error in auto Attendance Service", error);
+      throw new AppError(
+        "Internal Server Error during auto-checkout",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 module.exports = AttendanceService;
