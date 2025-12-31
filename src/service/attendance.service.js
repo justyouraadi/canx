@@ -303,7 +303,7 @@ class AttendanceService {
           console.log(
             `[Cron Job] Auto-checking out attendance ID: ${attendance._id}`
           );
-          await this.checkOut({ employee: attendance._id });
+          await this.checkOut({ employee: attendance.employee });
           console.log(
             `[Cron Job] Successfully auto-checked out attendance ID: ${attendance._id}`
           );
