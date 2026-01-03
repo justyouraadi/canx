@@ -116,58 +116,65 @@ class LocationService {
       });
 
       if (!locations || locations.length < 2) {
-      return { totalDistance: 0, totalFare: 0, perKmFare };
+        return { totalDistance: 0, totalFare: 0, perKmFare };
       }
+
+      const toRad = (value) => (value * Math.PI) / 180;
+      const calculateDist = (lat1, lon1, lat2, lon2) => {
+        const R = 6371;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) ** 2;
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      };
+
+      const MIN_DISTANCE_THRESHOLD = 0.02;
+      const MAX_SEGMENT_DISTANCE = 0.5;
+      const MAX_SPEED_KMH = 20;
 
       let totalDistance = 0;
-      const calculateDist = (lat1, lon1, lat2, lon2) => {
-      const R = 6371; 
-      const dLat = ((lat2 - lat1) * Math.PI) / 180;
-      const dLon = ((lon2 - lon1) * Math.PI) / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) *
-          Math.cos(lat2 * (Math.PI / 180)) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    };
-
-    let anchorPoint = locations[0];
+      let anchorPoint = locations[0];
 
       for (let i = 1; i < locations.length; i++) {
-      const currentPoint = locations[i];
+        const currentPoint = locations[i];
 
-      // 1. Skip if timestamp is identical (duplicate/batched data)
-      if (currentPoint.deviceTimestamp.getTime() === anchorPoint.deviceTimestamp.getTime()) {
-        continue;
+        const timeDiffMs =
+          currentPoint.deviceTimestamp - anchorPoint.deviceTimestamp;
+        if (timeDiffMs <= 0) {
+          anchorPoint = currentPoint;
+          continue;
+        }
+
+        const dist = calculateDist(
+          anchorPoint.latitude,
+          anchorPoint.longitude,
+          currentPoint.latitude,
+          currentPoint.longitude
+        );
+
+        const timeDiffHours = timeDiffMs / 3600000;
+        const speed = dist / timeDiffHours;
+
+        const isValidMovement =
+          dist >= MIN_DISTANCE_THRESHOLD &&
+          dist <= MAX_SEGMENT_DISTANCE &&
+          speed <= MAX_SPEED_KMH;
+
+        if (isValidMovement) {
+          totalDistance += dist;
+        }
+        anchorPoint = currentPoint;
       }
 
-      const dist = calculateDist(
-        anchorPoint.latitude,
-        anchorPoint.longitude,
-        currentPoint.latitude,
-        currentPoint.longitude
-      );
-
-      // 2. Logic Check: Thresholding (Ignore movement < 40 meters)
-      // This stops GPS "jitter" while the employee is sitting in an office
-      const MIN_DISTANCE_THRESHOLD = 0.02; 
-
-      // 3. Logic Check: Speed validation (Ignore "impossible" jumps)
-      // If speed > 150km/h, it's usually a GPS glitch
-      const timeDiffInHours = (currentPoint.deviceTimestamp - anchorPoint.deviceTimestamp) / 3600000;
-      const speed = dist / timeDiffInHours;
-
-      if (dist > MIN_DISTANCE_THRESHOLD && speed < 150) {
-        totalDistance += dist;
-        anchorPoint = currentPoint; // Set new anchor only after a valid movement
-      }
-    }
-
-     const finalDistance = parseFloat(totalDistance.toFixed(2));
-    const totalFare = Math.round(finalDistance * perKmFare);
+      const finalDistance = parseFloat(totalDistance.toFixed(2));
+      const totalFare = Math.round(finalDistance * perKmFare);
       return {
         totalDistance: finalDistance,
         totalFare: totalFare,
