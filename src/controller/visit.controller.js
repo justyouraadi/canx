@@ -9,9 +9,11 @@ async function create(req, res) {
     const response = await visitService.create({
       employee: req.employee._id,
       purpose: req.body.purpose,
-      clientName: req.body.clientName,
+      dealerName: req.body.dealerName,
+      asset: req.file ? req.file.filename : null,
       amount: req.body.amount,
       paymentMode: req.body.paymentMode,
+      description: req.body.description,
     });
     SuccessResponse.message = "Successfully completed the request";
     SuccessResponse.data = {};

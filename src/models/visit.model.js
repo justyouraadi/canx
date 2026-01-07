@@ -12,7 +12,11 @@ const visitSchema = new Schema(
       enum: ["PAYMENT", "ORDER"],
       required: true,
     },
-    clientName: {
+    dealerName: {
+      type: String,
+      required: true,
+    },
+    asset: {
       type: String,
       required: true,
     },
@@ -21,6 +25,10 @@ const visitSchema = new Schema(
       required: true,
     },
     paymentMode: {
+      type: String,
+      required: false,
+    },
+    description: {
       type: String,
       required: true,
     },
