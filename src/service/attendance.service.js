@@ -72,7 +72,7 @@ class AttendanceService {
       const { totalDistance, totalFare, perKmFare } =
         await locationService.calculateDistanceAndCalculate({
           employee: params.employee,
-          date: new Date(new Date(new Date()).setHours(0, 0, 0, 0)),
+          date: new Date(),
         });
 
       const updatedRecord = await attendanceRepository.updateById(

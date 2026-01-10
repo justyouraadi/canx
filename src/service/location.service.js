@@ -102,9 +102,17 @@ class LocationService {
       const filter = { employee: params.employee };
       const targetDate = params.date;
       const startDate = new Date(targetDate);
-      startDate.setHours(0, 0, 0, 0);
+      startDate.setUTCHours(0, 0, 0, 0);
+
       const endDate = new Date(targetDate);
-      endDate.setHours(23, 59, 59, 999);
+      endDate.setUTCHours(23, 59, 59, 999);
+
+      console.log(
+        "Calculating distance for:",
+        params.employee,
+        startDate,
+        endDate
+      );
 
       filter.deviceTimestamp = {
         $gte: startDate,
@@ -119,66 +127,50 @@ class LocationService {
         return { totalDistance: 0, totalFare: 0, perKmFare };
       }
 
-      const toRad = (value) => (value * Math.PI) / 180;
-      const calculateDist = (lat1, lon1, lat2, lon2) => {
-        const R = 6371;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
+      const toRadians = (deg) => deg * (Math.PI / 180);
+      const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; // Earth radius in KM
+
+        const dLat = toRadians(lat2 - lat1);
+        const dLon = toRadians(lon2 - lon1);
 
         const a =
           Math.sin(dLat / 2) ** 2 +
-          Math.cos(toRad(lat1)) *
-            Math.cos(toRad(lat2)) *
+          Math.cos(toRadians(lat1)) *
+            Math.cos(toRadians(lat2)) *
             Math.sin(dLon / 2) ** 2;
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
         return R * c;
       };
 
-      const MIN_DISTANCE_THRESHOLD = 0.02;
-      const MAX_SEGMENT_DISTANCE = 0.5;
-      const MAX_SPEED_KMH = 20;
-
       let totalDistance = 0;
-      let anchorPoint = locations[0];
 
       for (let i = 1; i < locations.length; i++) {
-        const currentPoint = locations[i];
+        const prev = locations[i - 1];
+        const curr = locations[i];
 
-        const timeDiffMs =
-          currentPoint.deviceTimestamp - anchorPoint.deviceTimestamp;
-        if (timeDiffMs <= 0) {
-          anchorPoint = currentPoint;
-          continue;
-        }
-
-        const dist = calculateDist(
-          anchorPoint.latitude,
-          anchorPoint.longitude,
-          currentPoint.latitude,
-          currentPoint.longitude
+        const distance = calculateDistanceKm(
+          prev.latitude,
+          prev.longitude,
+          curr.latitude,
+          curr.longitude
         );
 
-        const timeDiffHours = timeDiffMs / 3600000;
-        const speed = dist / timeDiffHours;
+        // Ignore GPS noise below 20 meters
+        // if (distance < 0.02) continue;
 
-        const isValidMovement =
-          dist >= MIN_DISTANCE_THRESHOLD &&
-          dist <= MAX_SEGMENT_DISTANCE &&
-          speed <= MAX_SPEED_KMH;
-
-        if (isValidMovement) {
-          totalDistance += dist;
-        }
-        anchorPoint = currentPoint;
+        totalDistance += distance;
       }
 
-      const finalDistance = parseFloat(totalDistance.toFixed(2));
-      const totalFare = Math.round(finalDistance * perKmFare);
+      totalDistance = Number(totalDistance.toFixed(2));
+      const totalFare = Number((totalDistance * perKmFare).toFixed(2));
+
       return {
-        totalDistance: finalDistance,
-        totalFare: totalFare,
-        perKmFare: perKmFare,
+        totalDistance, // KM
+        totalFare,
+        perKmFare,
       };
     } catch (error) {
       console.log(error, "<<< Error in Location Service calculateFare");
