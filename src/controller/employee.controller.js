@@ -151,6 +151,19 @@ async function updatePassword(req, res) {
   }
 }
 
+async function getDashboardDetails(req, res) {
+  try {
+    const response = await employeeService.getDashboardDetails();
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
@@ -160,4 +173,5 @@ module.exports = {
   updateStatus,
   updateDetails,
   updatePassword,
+  getDashboardDetails
 };

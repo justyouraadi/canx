@@ -1,8 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
-const { EmployeeRepository } = require("../repository");
+const {
+  EmployeeRepository,
+  AttendanceRepository,
+  LeaveRepository,
+} = require("../repository");
 const AppError = require("../utils/errors/app.error");
 const { Auth } = require("../utils/common");
 const employeeRepository = new EmployeeRepository();
+const attendanceRepository = new AttendanceRepository();
+const leaveRepository = new LeaveRepository();
 const bcrypt = require("bcryptjs");
 
 class EmployeeService {
@@ -270,7 +276,9 @@ class EmployeeService {
 
   async updatePassword(id, params) {
     try {
-      const response = await employeeRepository.updateById(id, { password: await bcrypt.hash(params.password, 10) });
+      const response = await employeeRepository.updateById(id, {
+        password: await bcrypt.hash(params.password, 10),
+      });
       if (!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
@@ -303,6 +311,135 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getDashboardDetails() {
+    try {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999);
+
+      const todayDate = new Date(new Date().setHours(0, 0, 0, 0));
+
+      const presentEmployeesCount = await attendanceRepository.count({
+        date: todayDate,
+      });
+
+      const leaveEmployeesCount = await leaveRepository.count({
+        startDate: { $lte: endOfToday },
+        endDate: { $gte: startOfToday },
+        status: "Approved",
+      });
+
+      const absentEmployeesAggregation = await employeeRepository.aggregate([
+        {
+          $match: { status: "ACTIVE" },
+        },
+        {
+          $lookup: {
+            from: "attendances",
+            let: { empId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$employee", "$$empId"] },
+                      { $eq: ["$date", todayDate] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "attendanceRecord",
+          },
+        },
+        {
+          $lookup: {
+            from: "leaves",
+            let: { empId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$employee", "$$empId"] },
+                      { $eq: ["$status", "Approved"] },
+                      { $lte: ["$startDate", endOfToday] },
+                      { $gte: ["$endDate", startOfToday] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "leaveRecord",
+          },
+        },
+        {
+          $match: {
+            attendanceRecord: { $size: 0 },
+            leaveRecord: { $size: 0 },
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            email: 1,
+            phone: 1,
+          },
+        },
+      ]);
+
+      const presentEmployees = await attendanceRepository.find(
+        {
+          date: todayDate,
+        },
+        {
+          select:
+            "-date -checkInTime -checkOutTime -totalDistance -perKmFare -totalFare -createdAt -updatedAt -__v",
+          populate: {
+            path: "employee",
+            select: "name email phone",
+          },
+        }
+      );
+
+      const leaveEmployees = await leaveRepository.find(
+        {
+          startDate: { $lte: endOfToday },
+          endDate: { $gte: startOfToday },
+          status: "Approved",
+        },
+        {
+          select:
+            "-type -startDate -endDate -reason -response -status -createdAt -updatedAt -__v",
+          populate: {
+            path: "employee",
+            select: "name email phone",
+          },
+        }
+      );
+
+      return {
+        presentEmployeesCount,
+        leaveEmployeesCount,
+        absentEmployeesCount: absentEmployeesAggregation.length,
+        presentEmployees,
+        leaveEmployees,
+        absentEmployees: absentEmployeesAggregation,
+      };
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service getDashboardDetails");
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        "Internal Server Error",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
