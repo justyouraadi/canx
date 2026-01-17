@@ -164,6 +164,30 @@ async function getDashboardDetails(req, res) {
   }
 }
 
+async function exportEmployees(req, res) {
+  try {
+    const response = await employeeService.exportToExcel({
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+    });
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + `employees_export_${Date.now()}.xlsx`,
+    );
+
+    await response.xlsx.write(res);
+    return res.end();
+  } catch (error) {
+    ErrorResponse.message = "Failed to export employee details";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 module.exports = {
   create,
   getAll,
@@ -173,5 +197,6 @@ module.exports = {
   updateStatus,
   updateDetails,
   updatePassword,
-  getDashboardDetails
+  getDashboardDetails,
+  exportEmployees
 };

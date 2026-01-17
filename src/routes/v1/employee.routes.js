@@ -28,5 +28,6 @@ router.put("/status/update", EmployeeController.updateStatus);
 router.patch("/details/update", EmployeeController.updateDetails);
 router.put("/password/update", EmployeeController.updatePassword);
 router.get("/dashboard/details", EmployeeController.getDashboardDetails);
+router.get("/export/excel", EmployeeController.exportEmployees);
 
 module.exports = router;

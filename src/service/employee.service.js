@@ -10,6 +10,7 @@ const employeeRepository = new EmployeeRepository();
 const attendanceRepository = new AttendanceRepository();
 const leaveRepository = new LeaveRepository();
 const bcrypt = require("bcryptjs");
+const ExcelJS = require("exceljs");
 
 class EmployeeService {
   async create(params) {
@@ -25,7 +26,7 @@ class EmployeeService {
 
         throw new AppError(
           `A Employee with this ${field}(${value}) already exists.`,
-          StatusCodes.CONFLICT
+          StatusCodes.CONFLICT,
         );
       }
 
@@ -41,7 +42,7 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -87,7 +88,7 @@ class EmployeeService {
       }
       throw new AppError(
         "Internal Server Error",
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -104,7 +105,7 @@ class EmployeeService {
       if (!employee) {
         throw new AppError(
           "No employee found with the corresponding details.",
-          StatusCodes.NOT_FOUND
+          StatusCodes.NOT_FOUND,
         );
       }
       return employee;
@@ -115,7 +116,7 @@ class EmployeeService {
       }
       throw new AppError(
         "Internal Server Error",
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -128,18 +129,18 @@ class EmployeeService {
       if (!checkIfEmployeeExists) {
         throw new AppError(
           "No employee found with the given phone number.",
-          StatusCodes.NOT_FOUND
+          StatusCodes.NOT_FOUND,
         );
       }
 
       const comparePassword = await checkIfEmployeeExists.comparePassword(
-        params.password
+        params.password,
       );
 
       if (!comparePassword) {
         throw new AppError(
           "The password you have entered is incorrect.",
-          StatusCodes.UNAUTHORIZED
+          StatusCodes.UNAUTHORIZED,
         );
       }
 
@@ -149,7 +150,7 @@ class EmployeeService {
       } else {
         throw new AppError(
           "Invalid phone number or password.",
-          StatusCodes.UNAUTHORIZED
+          StatusCodes.UNAUTHORIZED,
         );
       }
     } catch (error) {
@@ -161,7 +162,7 @@ class EmployeeService {
 
         throw new AppError(
           `An account with this ${field}(${value}) already exists.`,
-          StatusCodes.CONFLICT
+          StatusCodes.CONFLICT,
         );
       }
 
@@ -177,7 +178,7 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -191,7 +192,7 @@ class EmployeeService {
       ) {
         throw new AppError(
           "Invalid status value provided.",
-          StatusCodes.BAD_REQUEST
+          StatusCodes.BAD_REQUEST,
         );
       }
       const response = await employeeRepository.updateById(params.id, {
@@ -200,7 +201,7 @@ class EmployeeService {
       if (!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
-          StatusCodes.NOT_FOUND
+          StatusCodes.NOT_FOUND,
         );
       }
       return response;
@@ -213,7 +214,7 @@ class EmployeeService {
 
         throw new AppError(
           `A Employee with this ${field}(${value}) already exists.`,
-          StatusCodes.CONFLICT
+          StatusCodes.CONFLICT,
         );
       }
 
@@ -229,7 +230,7 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -240,7 +241,7 @@ class EmployeeService {
       if (!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
-          StatusCodes.NOT_FOUND
+          StatusCodes.NOT_FOUND,
         );
       }
       return response;
@@ -253,7 +254,7 @@ class EmployeeService {
 
         throw new AppError(
           `A Employee with this ${field}(${value}) already exists.`,
-          StatusCodes.CONFLICT
+          StatusCodes.CONFLICT,
         );
       }
 
@@ -269,7 +270,7 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -282,7 +283,7 @@ class EmployeeService {
       if (!response) {
         throw new AppError(
           "No employee found with the corresponding details.",
-          StatusCodes.NOT_FOUND
+          StatusCodes.NOT_FOUND,
         );
       }
       return response;
@@ -295,7 +296,7 @@ class EmployeeService {
 
         throw new AppError(
           `A Employee with this ${field}(${value}) already exists.`,
-          StatusCodes.CONFLICT
+          StatusCodes.CONFLICT,
         );
       }
 
@@ -311,7 +312,7 @@ class EmployeeService {
       }
       throw new AppError(
         ["Internal Server Error"],
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -406,7 +407,7 @@ class EmployeeService {
             path: "employee",
             select: "name email phone",
           },
-        }
+        },
       );
 
       const leaveEmployees = await leaveRepository.find(
@@ -422,7 +423,7 @@ class EmployeeService {
             path: "employee",
             select: "name email phone",
           },
-        }
+        },
       );
 
       return {
@@ -440,7 +441,7 @@ class EmployeeService {
       }
       throw new AppError(
         "Internal Server Error",
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -460,13 +461,79 @@ class EmployeeService {
       ) {
         throw new AppError(
           "Invalid or expired authentication token provided.",
-          StatusCodes.FORBIDDEN
+          StatusCodes.FORBIDDEN,
         );
       }
 
       throw new AppError(
         "Internal Server Error",
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async exportToExcel(params) {
+    try {
+      const { startDate, endDate } = params;
+      const filter = {};
+
+      if (startDate || endDate) {
+        filter.createdAt = {};
+        if (startDate) {
+          filter.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          filter.createdAt.$lte = end;
+        }
+      }
+
+      const employees = await employeeRepository.find(filter, {
+        sort: { createdAt: -1 },
+        populate: { path: "department", select: "name" },
+      });
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Employees");
+
+      worksheet.columns = [
+        { header: "Emp ID", key: "empId", width: 15 },
+        { header: "Full Name", key: "name", width: 25 },
+        { header: "Email", key: "email", width: 30 },
+        { header: "Phone", key: "phone", width: 15 },
+        { header: "Department", key: "department", width: 20 },
+        { header: "Designation", key: "designation", width: 20 },
+        { header: "Joining Date", key: "joiningDate", width: 15 },
+        { header: "Status", key: "status", width: 12 },
+        { header: "Created At", key: "createdAt", width: 20 },
+      ];
+
+      employees.forEach((emp) => {
+        worksheet.addRow({
+          empId: emp.empId,
+          name: emp.name,
+          email: emp.email,
+          phone: emp.phone,
+          department: emp.department ? emp.department.name : "N/A",
+          designation: emp.designation,
+          joiningDate: emp.joiningDate
+            ? emp.joiningDate.toISOString().split("T")[0]
+            : "N/A",
+          status: emp.status,
+          createdAt: emp.createdAt.toISOString().split("T")[0],
+        });
+      });
+
+      return workbook;
+    } catch (error) {
+      console.log(error, "<<< Error in Employee Service exportToExcel");
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        "Internal Server Error",
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
   }
