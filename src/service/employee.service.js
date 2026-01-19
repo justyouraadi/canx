@@ -537,6 +537,91 @@ class EmployeeService {
       );
     }
   }
+
+  async exportEmployeeAttendance(params) {
+    try {
+      const { startDate, endDate, employee } = params;
+      if (!employee) {
+        throw new AppError("Employee ID is required.", StatusCodes.BAD_REQUEST);
+      }
+      if (!startDate || !endDate) {
+        throw new AppError(
+          "Start date and end date are required.",
+          StatusCodes.BAD_REQUEST,
+        );
+      }
+      const filter = {
+        employee,
+        date: {
+          $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+          $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+        },
+      };
+
+      const attendance = await attendanceRepository.find(filter, {
+        sort: { createdAt: -1 },
+        populate: { path: "employee", select: "name empId phone" },
+      });
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Employee Attendance");
+
+      worksheet.columns = [
+        { header: "Emp ID", key: "empId", width: 15 },
+        { header: "Full Name", key: "name", width: 25 },
+        { header: "Phone", key: "phone", width: 15 },
+        { header: "Date", key: "date", width: 15 },
+        { header: "Check-In Time", key: "checkInTime", width: 20 },
+        { header: "Check-Out Time", key: "checkOutTime", width: 20 },
+        { header: "Total Distance (km)", key: "totalDistance", width: 20 },
+        { header: "Per Km Fare", key: "perKmFare", width: 15 },
+        { header: "Total Fare", key: "totalFare", width: 15 },
+      ];
+
+      const formatTime = (date) => {
+        if (!date) return "N/A";
+        return new Date(date).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+      };
+
+      const formatDate = (date) => {
+        if (!date) return "N/A";
+        return new Date(date).toLocaleDateString("en-CA");
+      };
+
+      attendance.forEach((emp) => {
+        worksheet.addRow({
+          empId: emp.employee.empId,
+          name: emp.employee.name,
+          phone: emp.employee.phone,
+          date: formatDate(emp.date),
+          checkInTime: formatTime(emp.checkInTime),
+          checkOutTime: formatTime(emp.checkOutTime),
+          totalDistance: emp.totalDistance || 0,
+          perKmFare: emp.perKmFare || 0,
+          totalFare: emp.totalFare || 0,
+        });
+      });
+
+      return workbook;
+    } catch (error) {
+      console.log(
+        error,
+        "<<< Error in Employee Service exportEmployeeAttendance",
+      );
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        "Internal Server Error",
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
 
 module.exports = EmployeeService;
