@@ -21,7 +21,7 @@ app.listen(ServerConfig.Base.PORT, async () => {
   await connectToDB();
   console.log(`Server is booming on port ${ServerConfig.Base.PORT} 🚀`);
   cron.schedule(
-    "30 19 * * *",
+    "0 22 * * *",
     async () => {
       console.log("--- Starting Scheduled Auto-Checkout at 19:30 ---");
       await attendanceService.autoCheckoutAll();
