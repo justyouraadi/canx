@@ -34,15 +34,15 @@ const visitSchema = new Schema(
     },
      latitude: {
       type: Number,
-      required: true,
+      // required: true,
     },
     longitude: {
       type: Number,
-      required: true,
+      // required: true,
     },
     deviceTimestamp: {
       type: Date,
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true }
