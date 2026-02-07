@@ -14,6 +14,9 @@ async function create(req, res) {
       amount: req.body.amount,
       paymentMode: req.body.paymentMode,
       description: req.body.description,
+      latitude: req.body.latitude,
+      longitude: req.body.longitude,
+      deviceTimestamp: req.body.deviceTimestamp,
     });
     SuccessResponse.message = "Successfully completed the request";
     SuccessResponse.data = {};
