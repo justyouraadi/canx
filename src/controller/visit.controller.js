@@ -65,9 +65,27 @@ async function getForAdmin(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+async function getForParticularEmployeeWithLatLan(req, res) {
+  try {
+    const response = await visitService.getForParticularEmployeeWithLatLan({
+      employeeId: req.params.id,
+      // employeeId: "6981972a052dfb573443f46e",
+      date: req.query.date
+      // date: "2026-02-09"
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = response;
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
 
 module.exports = {
   create,
   getAll,
   getForAdmin,
+  getForParticularEmployeeWithLatLan
 };

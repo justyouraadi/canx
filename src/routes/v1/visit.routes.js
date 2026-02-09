@@ -7,4 +7,5 @@ const router = express.Router();
 router.post("/", Upload.single("asset"), AuthMiddleware.checkEmpAuth, VisitController.create);
 router.get("/", AuthMiddleware.checkEmpAuth, VisitController.getAll);
 router.get("/admin/:id", VisitController.getForAdmin);
+router.get("/employee/:id",VisitController.getForParticularEmployeeWithLatLan)
 module.exports = router;
