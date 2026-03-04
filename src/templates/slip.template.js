@@ -30,7 +30,7 @@ function generateSlip(params) {
 
         /* Header Section */
         .header-banner {
-            background-color: #1a202c; /* Dark Navy */
+            background-color: #4C88F8; /* Dark Navy */
             color: #ffffff;
             padding: 30px 40px;
             display: flex;
