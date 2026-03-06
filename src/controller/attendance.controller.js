@@ -120,7 +120,7 @@ async function getEmployeeMonthlyAttendanceForAdmin(req, res) {
 async function getEmployeeMonthlyAttendanceForApp(req, res) {
   try {
     const response =
-      await attendanceService.getEmployeeMonthlyAttendanceForAdmin({
+      await attendanceService.getEmployeeMonthlyAttendanceForApp({
         employee: req.employee._id,
         year: req.query.year,
         month: req.query.month,

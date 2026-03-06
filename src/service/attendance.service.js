@@ -177,6 +177,77 @@ class AttendanceService {
 
   async getEmployeeMonthlyAttendanceForAdmin(params) {
     try {
+    const { employee, month, year } = params;
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const pipeline = [
+  {
+    $match: {
+      employee: new mongoose.Types.ObjectId(employee),
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    },
+  },
+  {
+    $sort: { date: 1 },
+  },
+  {
+    $lookup: {
+      from: "employees",
+      localField: "employee",
+      foreignField: "_id",
+      as: "employee",
+    },
+  },
+  {
+    $unwind: "$employee",
+  },
+  {
+    $project: {
+      date: 1,
+      checkInTime: 1,
+      checkOutTime: 1,
+      totalDistance: 1,
+      totalFare: 1,
+      perKmFare: 1,
+      employee: {
+        _id: "$employee._id",
+        name: "$employee.name",
+        email: "$employee.email",
+        phone: "$employee.phone",
+      },
+    },
+  },
+  {
+    $group: {
+      _id: null,
+      records: { $push: "$$ROOT" },
+      totalDistance: { $sum: "$totalDistance" },
+    },
+  },
+];
+
+    const result = await attendanceRepository.aggregate(pipeline);
+
+    return result[0] || { records: [], totalDistance: 0 };
+    } catch (error) {
+      console.log(error, "<<< Error in Attendance Service");
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(
+        ["Internal Server Error"],
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async getEmployeeMonthlyAttendanceForApp(params) {
+    try {
       const { employee, month, year } = params;
       const filter = { employee: employee };
       const startDate = new Date(year, month - 1, 1);

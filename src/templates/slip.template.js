@@ -49,7 +49,7 @@ function generateSlip(params) {
         .company-info p {
             margin: 5px 0 0;
             font-size: 13px;
-            color: #a0aec0;
+            color: #000000;
         }
 
         .payslip-title {
@@ -64,7 +64,7 @@ function generateSlip(params) {
 
         .payslip-title span {
             font-size: 14px;
-            color: #a0aec0;
+            color: #000000;
         }
 
         /* Employee Details Grid */
@@ -196,8 +196,8 @@ function generateSlip(params) {
         
         <div class="header-banner">
             <div class="company-info">
-                <h1>Canx International</h1>
-                <p>Jaipur, Rajasthan, India</p>
+                <h1>Canx International Pvt Ltd</h1>
+                <p>Daskroi, Ahmedabad, 360023</p>
             </div>
             <div class="payslip-title">
                 <h2>Payslip</h2>
