@@ -49,7 +49,7 @@ function generateSlip(params) {
         .company-info p {
             margin: 5px 0 0;
             font-size: 13px;
-            color: #808080;
+            color: #ffffff;
         }
 
         .payslip-title {
@@ -64,7 +64,7 @@ function generateSlip(params) {
 
         .payslip-title span {
             font-size: 14px;
-            color: #808080;
+            color: #ffffff;
         }
 
         /* Employee Details Grid */
