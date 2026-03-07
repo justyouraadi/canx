@@ -49,7 +49,7 @@ function generateSlip(params) {
         .company-info p {
             margin: 5px 0 0;
             font-size: 13px;
-            color: #000000;
+            color: #808080;
         }
 
         .payslip-title {
@@ -64,7 +64,7 @@ function generateSlip(params) {
 
         .payslip-title span {
             font-size: 14px;
-            color: #000000;
+            color: #808080;
         }
 
         /* Employee Details Grid */
@@ -201,7 +201,7 @@ function generateSlip(params) {
             </div>
             <div class="payslip-title">
                 <h2>Payslip</h2>
-                <span>${params.day}/${params.month}/${params.year}</span>
+                <span>${params.month}/${params.year}</span>
             </div>
         </div>
 
