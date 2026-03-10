@@ -25,6 +25,7 @@ router.get(
 );
 router.get("/get/location/app", AuthMiddleware.checkEmpAuth, LocationController.getEmployeeLocationForApp);
 router.put("/status/update", EmployeeController.updateStatus);
+router.put("/profile/update", Upload.single("profile"), EmployeeController.updateProfile);
 router.patch("/details/update", EmployeeController.updateDetails);
 router.put("/password/update", EmployeeController.updatePassword);
 router.get("/dashboard/details", EmployeeController.getDashboardDetails);

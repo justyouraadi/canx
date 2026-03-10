@@ -109,6 +109,21 @@ async function updateStatus(req, res) {
   }
 }
 
+async function updateProfile(req, res) {
+  try {
+    const response = await employeeService.updateDetails(req.body.id,{
+      profile: req.file ? req.file.filename : null,
+    });
+    SuccessResponse.message = "Successfully completed the request";
+    SuccessResponse.data = {};
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.message = "Something went wrong";
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 async function updateDetails(req, res) {
   try {
     const response = await employeeService.updateDetails(req.body.id, {
@@ -225,5 +240,6 @@ module.exports = {
   updatePassword,
   getDashboardDetails,
   exportEmployees,
-  exportEmployeeAttendance
+  exportEmployeeAttendance,
+  updateProfile
 };
